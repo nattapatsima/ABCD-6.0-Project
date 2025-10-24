@@ -1,0 +1,85 @@
+---
+title: "Untitled"
+format:
+  html:
+    page-layout: article
+    toc: true
+    toc-depth: 6
+    sidebar:
+      style: docked
+      contents: toc
+      width: 350px
+    grid:
+      body-width: 900px
+    html-math-method: katex
+    css: styles.css
+    code-overflow: scroll
+---
+
+```{r}
+#| include: false
+
+options(knitr.kable.NA = "", dplyr.print_max = Inf, dplyr.print_min = Inf)
+options(tibble.print_max = Inf, tibble.width = Inf)
+knitr::opts_chunk$set(echo = TRUE)
+library(styler)
+library(knitr)
+library(tidyverse)
+library(psych)
+library(lavaan)
+library(semPlot)
+library(semptools)
+library(parameters)
+library(rio)
+library(rmarkdown)
+library(visdat)
+library(summarytools)
+library(EFAtools)
+library(lavaanPlot)
+library(ggplot2)
+```
+
+```{r}
+readRDS("result_sum_table.rds") %>%
+  mutate(
+    path = paste(rhs, "→", str_sub(op, -1)), # readable path
+    response = str_extract(op, "^[A-Za-z]+") %>%
+      recode(
+        "Int" = "Internalizing",
+        "Ext" = "Externalizing",
+        "p" = "general~italic(p)~factor"
+      )
+  ) %>%
+  ggplot(aes(
+    x = est.std,
+    y = reorder(path, -No),
+    color = label
+  )) +
+  geom_point(position = position_dodge(width = 0.6), size = 1.5) +
+  geom_errorbarh(
+    aes(xmin = ci.lower, xmax = ci.upper),
+    position = position_dodge(width = 0.6),
+    height = 0.4,
+    linewidth = 1
+  ) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "gray40") +
+  facet_wrap(~response, labeller = label_parsed) +
+  labs(
+    x = "Standardized Estimate with 95% CI",
+    y = "Path",
+    color = "Model"
+  ) +
+  scale_x_continuous(labels = signs::signs_format(trim_leading_zeros = TRUE)) +
+  scale_color_discrete(
+    labels = c(
+      "pga"     = "with puberty",
+      "pga_pu"  = "w/o puberty"
+    )
+  ) +
+  theme_minimal(base_size = 15) +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.y = element_blank(),
+    strip.text = element_text(face = "bold")
+  )
+```
