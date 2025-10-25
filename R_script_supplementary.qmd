@@ -15,7 +15,7 @@ format:
     css: styles.css
 ---
 
-Supplementary R Script: 
+Supplementary R Script:
 
 This document provides the complete R code for all analyses, data preparation, and visualizations reported in the manuscript.
 
